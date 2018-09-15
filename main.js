@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
+// const {createServer} = require('http-server');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -8,10 +9,11 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
-
+  // server = new createServer();
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
-
+  mainWindow.loadFile('default.html')
+  // mainWindow.loadURL('https://grantorrent.net')
+  // server.listen();
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 

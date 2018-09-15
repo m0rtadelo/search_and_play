@@ -1,22 +1,24 @@
 {
-  "name": "electron-quick-start",
-  "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "name": "search_and_play",
+  "version": "0.0.1",
+  "description": "A torrent searcher (webcrawler) and player",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/...",
   "keywords": [
     "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "torrent",
+    "player",
+    "search"
   ],
-  "author": "GitHub",
+  "author": "m0rtadelo",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^2.0.0"
+  },
+  "dependencies": {
+    "request": "^2.88.0"
   }
 }
