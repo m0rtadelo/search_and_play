@@ -5,6 +5,7 @@
 var request = require('request');
 var fs = require('fs');
 var props = require('./properties');
+const rra = require('recursive-readdir-async')
 
 module.exports = {
     /**
@@ -28,17 +29,62 @@ module.exports = {
      * @param {string} magnet link (magnet)
      */
     openMagnet(magnet) {
-        if(isMagnetLink(magnet)){
+        if (isMagnetLink(magnet)) {
             openLink(magnet);
         } else {
             alert('Not a valid magnet link!');
         }
     },
+    /**
+     * Plays the specified torrent file
+     * @param {string} file torrent filessystem path
+     */
     openTorrent(file) {
         play(file);
+    },
+    showItems(path) {
+        showItems(path);
     }
 }
 
+function showItems(path) {
+    if (!!!path)
+        path = props.localCatalog;
+    let container = document.getElementById('container');
+    container.innerHTML = path + '<br><br><div class="list-group">';
+    rra.list(path, { ignoreFolders: true, recursive: true }).then((list) => {
+        // container.innerHTML += '<a name=".." isDirectory=true class="list-group-item list-group-item-action" href="#"><i class="fas fa-folder"></i>&nbsp; ..</a>';
+        list.forEach((item) => {
+            if (item.isDirectory) {
+                container.innerHTML += '<a name="' + item.name + '" isDirectory=true class="list-group-item list-group-item-action" href="#"><i class="fas fa-folder"></i>&nbsp;' + ' ' + item.name + '</a>';
+            } else {
+                container.innerHTML += '<a name="' + item.name + '" class="list-group-item list-group-item-action" href="#"><i class="fas fa-file-video"></i>&nbsp;' + ' ' + item.name + '</a>';
+            }
+        });
+        container.innerHTML += '</div>';
+        container.querySelectorAll('a').forEach((elem) => {
+            elem.addEventListener('click', (p) => {
+                if (p.target.attributes['isDirectory'])
+                    if (p.target.name == '..') {
+                        showItems(folderUp(path));
+                    } else {
+                        showItems(path + "\\" + p.target.name);
+                    }
+                else {
+                    console.log(path + '\\' + p.target.name);
+                    play(path + '\\' + p.target.name);
+                }
+            });
+        })
+    });
+}
+
+function folderUp(path) {
+    let folder = path.split('\\');
+    folder[folder.length - 1] = '';
+    let result = folder.join('\\');
+    return result.substring(0, result.length - 1);
+}
 /**
  * Renders the elements of the url based on the config provider object.
  * @param {string} url relative/absolute url to show in the view
@@ -118,7 +164,7 @@ function isTorrent(url) {
  * @param {string} param parameters for video player
  */
 function play(param) {
-    require('child_process').exec(props.roxFolder + ' ' + param);
+    require('child_process').exec(props.roxFolder + ' "' + param + '"');
 }
 
 /**

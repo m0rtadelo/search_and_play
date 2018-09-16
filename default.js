@@ -14,7 +14,6 @@ document.getElementById("form").addEventListener('submit', (e) => {
 
 document.getElementById('openTorrent').addEventListener('click',(e) => {
     e.preventDefault();
-    // dialog.showErrorBox('Error','opening torrent...');
     dialog.showOpenDialog(this, function(names) {
         if(!!names) {
             bis.openTorrent(names[0]);
@@ -39,3 +38,8 @@ document.getElementById('openMagnet').addEventListener('click',(e) => {
     })
     .catch(console.error);    
 });
+
+function log(message) {
+    bis.log(message);
+}
+bis.showItems();
