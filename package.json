@@ -19,6 +19,7 @@
     "electron": "^2.0.0"
   },
   "dependencies": {
+    "electron-prompt": "^1.2.0",
     "request": "^2.88.0"
   }
 }

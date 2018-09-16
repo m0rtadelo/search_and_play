@@ -22,6 +22,20 @@ module.exports = {
     */
     log: function (message) {
         log(message);
+    },
+    /**
+     * Plays a magnet link
+     * @param {string} magnet link (magnet)
+     */
+    openMagnet(magnet) {
+        if(isMagnetLink(magnet)){
+            openLink(magnet);
+        } else {
+            alert('Not a valid magnet link!');
+        }
+    },
+    openTorrent(file) {
+        play(file);
     }
 }
 
