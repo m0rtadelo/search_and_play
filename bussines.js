@@ -97,11 +97,21 @@ function showUrl(url, provider, iteration) {
         let xml = parser.parseFromString(body, 'text/html');
         let selector = (iteration == 1 ? provider.searchSelector : provider.downSelector);
         let list = xml.querySelectorAll(selector);
-        document.getElementById('container').innerHTML += list[0].outerHTML;
-        let elements = document.getElementById('container').querySelectorAll('a');
+        let elements;
+        if(iteration == 1) {
+            document.getElementById(provider.container).innerHTML += list[0].outerHTML;
+            elements = document.getElementById(provider.container).querySelectorAll('a');
+            $('#myTab a[href="#profile"]').tab('show') // Select tab by name
+        } else {
+            document.getElementById('result').innerHTML = list[0].outerHTML;
+            elements = document.getElementById('result').querySelectorAll('a');
+            $('#myTab a[href="#download"]').tab('show') // Select tab by name
+        }
         elements.forEach(element => {
             if (!!!element.getAttribute('provider'))
                 element.setAttribute('provider', JSON.stringify(provider));
+            if(!!!element.getAttribute('parentUrl'))
+                element.setAttribute('parentUrl', url);
             element.addEventListener('click', (e) => {
                 e.preventDefault();
                 var link = getHref(e.path);
@@ -172,7 +182,8 @@ function play(param) {
  * @param {string} message the string to be printed on the view
  */
 function log(message) {
-    document.getElementById('container').innerHTML = message;
+    //document.getElementById('container').innerHTML = message;
+    toastr.info(message);
 }
 
 /**
