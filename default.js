@@ -47,3 +47,13 @@ function log(message) {
     bis.log(message);
 }
 bis.showItems();
+
+async function aload(title) {
+    const TorrentSearchApi = require('torrent-search-api');
+    TorrentSearchApi.enablePublicProviders();
+    console.log(TorrentSearchApi.getActiveProviders());
+    const torrents = await TorrentSearchApi.search(title, 'Movies', 200);
+    console.log(torrents);
+};
+
+// aload();
