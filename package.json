@@ -22,6 +22,7 @@
     "electron-prompt": "^1.2.0",
     "recursive-readdir-async": "^1.0.2",
     "request": "^2.88.0",
-    "toastr": "^2.1.4"
+    "toastr": "^2.1.4",
+    "torrent-search-api": "^2.0.3"
   }
 }
