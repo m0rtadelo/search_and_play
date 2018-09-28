@@ -63,6 +63,10 @@
                 <a class="nav-link" id="result-tab" data-toggle="tab" href="#download" role="tab" aria-controls="result"
                     aria-selected="false">Download</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="player-tab" data-toggle="tab" href="#player" role="tab" aria-controls="player"
+                    aria-selected="false">Player</a>
+            </li>
         </ul>
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -77,22 +81,15 @@
             <div class="tab-pane fade" id="download" role="tabpanel" aria-labelledby="result-tab">
                 <div class="container" id="result"></div>
             </div>
+            <div class="tab-pane fade" id="player" role="tabpanel" aria-labelledby="player-tab">
+                <div class="container" id="player"></div>
+            </div>
         </div>
     </div>
 </body>
 <script>
-    // You can also require other files to run in this process
     require('./default.js')
-
     $('#myTab a').on('click', function (e) {
-        // document.querySelectorAll('#myTab a').forEach(element => {
-        //     element.addEventListener('click', (e) => {
-        //         e.preventDefault()
-        //         console.log(element);
-        //         element.tab('show');
-
-        //     })
-        // })
         e.preventDefault()
         $(this).tab('show')
     })

@@ -174,7 +174,11 @@ function isTorrent(url) {
  * @param {string} param parameters for video player
  */
 function play(param) {
-    require('child_process').exec(props.roxFolder + ' "' + param + '"');
+    if(props.player == 'external') {
+        require('child_process').exec(props.roxFolder + ' "' + param + '"');
+    } else {
+        // TODO: Implement internal player (webtorrent)
+    }
 }
 
 /**
