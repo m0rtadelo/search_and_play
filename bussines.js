@@ -6,6 +6,7 @@ var request = require('request');
 var fs = require('fs');
 var props = require('./properties');
 const rra = require('recursive-readdir-async')
+const webtorrent = require('./webtorrent');
 
 module.exports = {
     /**
@@ -178,6 +179,8 @@ function play(param) {
         require('child_process').exec(props.roxFolder + ' "' + param + '"');
     } else {
         // TODO: Implement internal player (webtorrent)
+        document.getElementById('player').innerHTML = "";
+        webtorrent.play(param, 'player');
     }
 }
 
