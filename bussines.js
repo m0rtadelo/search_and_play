@@ -98,7 +98,7 @@ function showUrl(url, provider, iteration) {
         let selector = (iteration == 1 ? provider.searchSelector : provider.downSelector);
         let list = xml.querySelectorAll(selector);
         let elements;
-        if(iteration == 1) {
+        if (iteration == 1) {
             document.getElementById(provider.container).innerHTML += list[0].outerHTML;
             elements = document.getElementById(provider.container).querySelectorAll('a');
             $('#myTab a[href="#profile"]').tab('show') // Select tab by name
@@ -110,16 +110,18 @@ function showUrl(url, provider, iteration) {
         elements.forEach(element => {
             if (!!!element.getAttribute('provider'))
                 element.setAttribute('provider', JSON.stringify(provider));
-            if(!!!element.getAttribute('parentUrl'))
-                element.setAttribute('parentUrl', url);
             element.addEventListener('click', (e) => {
                 e.preventDefault();
+                console.log(e);
                 var link = getHref(e.path);
                 var prov = link.getAttribute('provider');
                 if (!!prov)
                     provider = JSON.parse(prov);
+                if(getDomain(link.href) != '') {
+                    provider.domain = getDomain(link.href);
+                }
                 if (isTarget(link.href)) {
-                    openLink(link.href);
+                    openLink(link.href, provider);
                 } else {
                     log(`loading '${link.href}'...`);
                     iteration = iteration + 1;
@@ -132,20 +134,30 @@ function showUrl(url, provider, iteration) {
 
 /**
  * Opens the torrent/magnet link with the video player for playback streaming
- * @param {string} url absolute url or magnet link for torrent
+ * @param {string} url absolute/relative url or magnet link for torrent
  */
-function openLink(url) {
+function openLink(url, provider) {
+    console.log('open: ' + url);
     try {
         fs.unlinkSync(props.filename);
     } catch (e) { }
     if (isMagnetLink(url)) {
         play(url);
     } else {
-        var steam = request(url).pipe(fs.createWriteStream(props.filename));
-        steam.on('finish', function () {
-            let path = require('path').resolve('.');
-            play(path + '/' + props.filename);
-        })
+        try {
+            var steam = request(url).pipe(fs.createWriteStream(props.filename));
+            steam.on('finish', function () {
+                let path = require('path').resolve('.');
+                play(path + '/' + props.filename);
+            })                
+        } catch (error) {
+            if(getDomain(url) == '') {
+                let uri = new URL(url);
+                console.log(uri);
+                const path = uri.pathname.substr(3);
+                openLink(provider.domain + path);
+            }
+        }
     }
 }
 
@@ -205,4 +217,10 @@ function getHref(path) {
         }
     }
     return undefined;
+}
+
+function getDomain(url) {
+    let uri = new URL(url);
+    console.log(uri);
+    return uri.protocol == 'file:' ? '' : uri.protocol + '//' + uri.host;
 }
