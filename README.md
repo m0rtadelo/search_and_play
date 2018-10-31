@@ -8,4 +8,15 @@ WIP
 
 ## requeriments
 
-ROX Player http://roxplayer.com/
+* ROX Player http://roxplayer.com/
+* node
+
+## installation
+```npm install```
+
+## configuration
+
+set roxFolder in properties.js
+
+## execution
+```npm start```
