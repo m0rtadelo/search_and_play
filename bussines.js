@@ -53,14 +53,18 @@ function showItems(path) {
     let container = document.getElementById('container');
     container.innerHTML = path + '<br><br><div class="list-group">';
     rra.list(path, { ignoreFolders: true, recursive: true }).then((list) => {
-        // container.innerHTML += '<a name=".." isDirectory=true class="list-group-item list-group-item-action" href="#"><i class="fas fa-folder"></i>&nbsp; ..</a>';
-        list.forEach((item) => {
-            if (item.isDirectory) {
-                container.innerHTML += '<a name="' + item.name + '" isDirectory=true class="list-group-item list-group-item-action" href="#"><i class="fas fa-folder"></i>&nbsp;' + ' ' + item.name + '</a>';
-            } else {
-                container.innerHTML += '<a name="' + item.name + '" class="list-group-item list-group-item-action" href="#"><i class="fas fa-file-video"></i>&nbsp;' + ' ' + item.name + '</a>';
-            }
-        });
+        if (list.error) {
+            logError(list.error.message);
+            container.innerHTML += list.error.message;
+        } else {
+            list.forEach((item) => {
+                if (item.isDirectory) {
+                    container.innerHTML += '<a name="' + item.name + '" isDirectory=true class="list-group-item list-group-item-action" href="#"><i class="fas fa-folder"></i>&nbsp;' + ' ' + item.name + '</a>';
+                } else {
+                    container.innerHTML += '<a name="' + item.name + '" class="list-group-item list-group-item-action" href="#"><i class="fas fa-file-video"></i>&nbsp;' + ' ' + item.name + '</a>';
+                }
+            });
+        }
         container.innerHTML += '</div>';
         container.querySelectorAll('a').forEach((elem) => {
             elem.addEventListener('click', (p) => {
@@ -194,8 +198,15 @@ function play(param) {
  * @param {string} message the string to be printed on the view
  */
 function log(message) {
-    //document.getElementById('container').innerHTML = message;
     toastr.info(message);
+}
+
+/**
+ * Prints a error string o the view
+ * @param {string} message the string to be printed on the view
+ */
+function logError(message) {
+    toastr.error(message);
 }
 
 /**
