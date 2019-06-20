@@ -8,7 +8,7 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1010, height: 680, autoHideMenuBar: true})
+  mainWindow = new BrowserWindow({width: 1220, height: 800, autoHideMenuBar: true})
   // server = new createServer();
   // and load the index.html of the app.
   mainWindow.loadFile('default.html')
