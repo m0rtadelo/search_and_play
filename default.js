@@ -7,8 +7,8 @@ document.getElementById("form").addEventListener('submit', (e) => {
     e.preventDefault();
     let search = document.getElementById('searchText').value;
     bis.log(`searching '${search}'...`);
-    document.getElementById("container1").innerHTML = "";
-    document.getElementById("container2").innerHTML = "";
+    // document.getElementById("container1").innerHTML = "";
+    // document.getElementById("container2").innerHTML = "";
     document.getElementById("result").innerHTML = "";
     document.getElementById("searchText").value = "";
     bis.setSearch(search);
@@ -48,13 +48,3 @@ function log(message) {
     bis.log(message);
 }
 bis.showItems();
-
-async function aload(title) {
-    const TorrentSearchApi = require('torrent-search-api');
-    TorrentSearchApi.enablePublicProviders();
-    console.log(TorrentSearchApi.getActiveProviders());
-    const torrents = await TorrentSearchApi.search(title, 'Movies', 200);
-    console.log(torrents);
-};
-
-// aload();

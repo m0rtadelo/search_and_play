@@ -4,15 +4,13 @@ module.exports = {
             name: 'GranTorrent',
             searchUrl: 'https://grantorrent.net/?s=',
             searchSelector: 'div.contenedor-home',
-            downSelector: 'table.demo',
-            container: 'container1'
+            downSelector: 'table.demo'
         },
         {
             name: 'EliteTorrent',
             searchUrl: 'https://www.elitetorrent.one/?x=15&y=13&s=',
             searchSelector: 'ul.miniboxs',
-            downSelector: 'div.enlace_descarga',
-            container: 'container2'
+            downSelector: 'div.enlace_descarga'
         },
         {
             name: 'Jacket',

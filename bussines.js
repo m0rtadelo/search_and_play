@@ -1,13 +1,13 @@
 /**
  * author: m0rtadelo
  */
-
+var providers = require('./providers')
 var request = require('request');
 var fs = require('fs');
 var props = require('./properties');
 const rra = require('recursive-readdir-async')
 var net = require('net');
-var URL = require('url');
+var URL2 = require('url');
 var search;
 // var socket = require('socket.io')(http);//.connect('http://localhost:8080', { 'forceNew': true });
 module.exports = {
@@ -20,6 +20,9 @@ module.exports = {
      */
     showUrl: function (url, provider, iteration) {
         console.log('('+provider.name+') query started: ' + url);
+        document.getElementById(provider.name+'container').innerHTML = `Searching...<div class="spinner-grow" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>`;
         if(provider.isJson)
             getJson(url, provider);
         else
@@ -61,10 +64,12 @@ function getJson(url, provider) {
         if(error){
             console.error('('+provider.name+') request error: ' + url)
             console.error(error);
+            toastr.error('('+provider.name+') request error!');
         } else {
-            console.log('('+provider.name+') query finished!');            
+            console.log('('+provider.name+') query finished!');   
+            toastr.success('('+provider.name+') query finished!');         
         }        
-        let container = document.getElementById('jacketContainer');
+        let container = document.getElementById(provider.name + 'container');
         container.innerHTML='';
         let results = JSON.parse(body).Results;
         results.sort(function(a,b){
@@ -88,7 +93,45 @@ function getJson(url, provider) {
     });
 }
 
+function addTab(tabs, content, name) {
+    tabs.innerHTML +=  `<li class="nav-item">
+    <a class="nav-link" id="${name}-tab" data-toggle="tab" href="#${name}" role="tab" aria-controls="${name}"
+        aria-selected="false">${name}</a>
+</li>`
+    content.innerHTML += `<div class="tab-pane fade" id="${name}" role="tabpanel" aria-labelledby="${name}-tab">
+    <div class="container" id="${name}container"></div>
+</div>`
+}
+
+function createTabs() {
+    const myTab = document.getElementById('myTab');
+    const myTabContent = document.getElementById('myTabContent');
+    myTab.innerHTML = `<li class="nav-item">
+    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+        aria-selected="true">Local</a>
+</li>`;
+    myTabContent.innerHTML = `<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+    <div class="container" id="container"></div>
+</div>` ;
+    providers.list.forEach(provider => {
+        addTab(myTab, myTabContent, provider.name);
+    })
+
+    myTab.innerHTML += ` <li class="nav-item">
+    <a class="nav-link" id="result-tab" data-toggle="tab" href="#download" role="tab" aria-controls="result"
+        aria-selected="false">Download</a>
+</li>`
+    myTabContent.innerHTML += `<div class="tab-pane fade" id="download" role="tabpanel" aria-labelledby="result-tab">
+    <div class="container" id="result"></div>
+</div>`
+    $('#myTab a').on('click', function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+    })
+    
+}
 function showItems(path) {
+    createTabs()
     if (!!!path)
         path = props.localCatalog;
     let container = document.getElementById('container');
@@ -141,8 +184,10 @@ function showUrl(url, provider, iteration) {
         if(error){
             console.error('('+provider.name+') request error: ' + url)
             console.error(error);
+            toastr.error('('+provider.name+') request error!');
         } else {
-            console.log('('+provider.name+') query finished!');            
+            console.log('('+provider.name+') query finished!');
+            toastr.success('('+provider.name+') query finished!');            
         }  
         let parser = new DOMParser();
         let xml = parser.parseFromString(body, 'text/html');
@@ -150,9 +195,10 @@ function showUrl(url, provider, iteration) {
         let list = xml.querySelectorAll(selector);
         let elements;
         if (iteration == 1) {
-            document.getElementById(provider.container).innerHTML += list[0].outerHTML;
-            elements = document.getElementById(provider.container).querySelectorAll('a');
-            $('#myTab a[href="#profile"]').tab('show') // Select tab by name
+            document.getElementById(provider.name+'container').innerHTML = '';
+            document.getElementById(provider.name+'container').innerHTML += list[0].outerHTML;
+            elements = document.getElementById(provider.name+'container').querySelectorAll('a');
+            // $('#myTab a[href="#profile"]').tab('show') // Select tab by name
         } else {
             document.getElementById('result').innerHTML = list[0].outerHTML;
             elements = document.getElementById('result').querySelectorAll('a');
@@ -200,7 +246,7 @@ function openLink(url, provider) {
         try {
             if(provider && provider.isJson){
                 var client = new net.Socket();
-                var h = URL.parse(url, true);
+                var h = URL2.parse(url, true);
                 client.connect(h.port, h.hostname, function() {
                     var data = 'GET '+h.path+ " HTTP/1.1\r\n"
                     data += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n"
@@ -232,6 +278,12 @@ function openLink(url, provider) {
                         })      
                     }          
                 });
+            } else {
+                var steam = request(url).pipe(fs.createWriteStream(props.filename));
+                steam.on('finish', function () {
+                    let path = require('path').resolve('.');
+                    play(path + '/' + props.filename);
+                })      
             }
         } catch (error) {
             if(getDomain(url) == '') {
