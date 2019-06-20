@@ -6,8 +6,12 @@ var request = require('request');
 var fs = require('fs');
 var props = require('./properties');
 const rra = require('recursive-readdir-async')
-
+var net = require('net');
+var URL = require('url');
+var search;
+// var socket = require('socket.io')(http);//.connect('http://localhost:8080', { 'forceNew': true });
 module.exports = {
+    setSearch: function(value){search = value},
     /**
      * Renders the elements of the url based on the config provider object.
      * @param {string} url relative/absolute url to show in the view
@@ -15,7 +19,11 @@ module.exports = {
      * @param {number} iteration index of the deep iteration 
      */
     showUrl: function (url, provider, iteration) {
-        showUrl(url, provider, iteration);
+        console.log('('+provider.name+') query started: ' + url);
+        if(provider.isJson)
+            getJson(url, provider);
+        else
+            showUrl(url, provider, iteration);
     },
     /**
     * Prints a string o the view
@@ -45,6 +53,39 @@ module.exports = {
     showItems(path) {
         showItems(path);
     }
+}
+
+function getJson(url, provider) {
+    let link;
+    request(url, function (error, response, body) {
+        if(error){
+            console.error('('+provider.name+') request error: ' + url)
+            console.error(error);
+        } else {
+            console.log('('+provider.name+') query finished!');            
+        }        
+        let container = document.getElementById('jacketContainer');
+        container.innerHTML='';
+        let results = JSON.parse(body).Results;
+        results.sort(function(a,b){
+            return b.Seeders - a.Seeders;
+        })
+        results.forEach(item => {
+            if(item.Seeders>0 || item.Peers>0){
+                if(provider.filter && item.Title.toString().toUpperCase().includes(search.toString().toUpperCase())){
+                    link = item.Link ? item.Link : item.MagnetUri;
+                    container.innerHTML += 
+                    `<div class="list-group" style="font-size:10pt" name="${link}"><a name="${link}" class="list-group-item list-group-item-action" href="#"><span class="badge badge-success" name="${link}">${item.Seeders} / ${item.Peers}</span>&nbsp;${item.Title}&nbsp;&nbsp;<small class="text-muted" name="${link}">[${(item.Size/1024/1024/1024).toFixed(2)} Gb]</small></a></div>`;
+                }
+            }
+        });
+        container.querySelectorAll('a').forEach((elem) => {
+            elem.addEventListener('click', function(p) {
+                openLink(p.target.name, provider);
+            });
+        });
+        // console.log(results);
+    });
 }
 
 function showItems(path) {
@@ -97,6 +138,12 @@ function folderUp(path) {
  */
 function showUrl(url, provider, iteration) {
     request(url, function (error, response, body) {
+        if(error){
+            console.error('('+provider.name+') request error: ' + url)
+            console.error(error);
+        } else {
+            console.log('('+provider.name+') query finished!');            
+        }  
         let parser = new DOMParser();
         let xml = parser.parseFromString(body, 'text/html');
         let selector = (iteration == 1 ? provider.searchSelector : provider.downSelector);
@@ -112,26 +159,28 @@ function showUrl(url, provider, iteration) {
             $('#myTab a[href="#download"]').tab('show') // Select tab by name
         }
         elements.forEach(element => {
-            if (!!!element.getAttribute('provider'))
-                element.setAttribute('provider', JSON.stringify(provider));
-            element.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log(e);
-                var link = getHref(e.path);
-                var prov = link.getAttribute('provider');
-                if (!!prov)
-                    provider = JSON.parse(prov);
-                if(getDomain(link.href) != '') {
-                    provider.domain = getDomain(link.href);
-                }
-                if (isTarget(link.href)) {
-                    openLink(link.href, provider);
-                } else {
-                    log(`loading '${link.href}'...`);
-                    iteration = iteration + 1;
-                    showUrl(link.href, provider, iteration);
-                }
-            })
+            if(!provider.isJson){
+                if (!!!element.getAttribute('provider'))
+                    element.setAttribute('provider', JSON.stringify(provider));
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log(e);
+                    var link = getHref(e.path);
+                    var prov = link.getAttribute('provider');
+                    if (!!prov)
+                        provider = JSON.parse(prov);
+                    if(getDomain(link.href) != '') {
+                        provider.domain = getDomain(link.href);
+                    }
+                    if (isTarget(link.href)) {
+                        openLink(link.href, provider);
+                    } else {
+                        log(`loading '${link.href}'...`);
+                        iteration = iteration + 1;
+                        showUrl(link.href, provider, iteration);
+                    }
+                })
+            }
         })
     });
 }
@@ -149,11 +198,41 @@ function openLink(url, provider) {
         play(url);
     } else {
         try {
-            var steam = request(url).pipe(fs.createWriteStream(props.filename));
-            steam.on('finish', function () {
-                let path = require('path').resolve('.');
-                play(path + '/' + props.filename);
-            })                
+            if(provider && provider.isJson){
+                var client = new net.Socket();
+                var h = URL.parse(url, true);
+                client.connect(h.port, h.hostname, function() {
+                    var data = 'GET '+h.path+ " HTTP/1.1\r\n"
+                    data += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n"
+                    data += "Connection: keep-alive\r\n"
+                    data += "Host: "+h.host+"\r\n"
+                    data += "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36\r\n"
+                    data += "Accept-Encoding: gzip, deflate\r\n"
+                    data += "Accept-Language: ca-ES,ca;q=0.9,es-ES;q=0.8,es;q=0.7\r\n"
+                    data += "\r\n"
+                    client.write(data);
+                })
+                client.on('data', function(data) {
+                    const lines = data.toString().split('\n');
+                    lines.forEach(line => {
+                        if(line.indexOf('Location:') == 0) {
+                            url = line.substr(10);
+                        }
+                    });
+                    client.destroy(); // kill client after server's response
+                });
+                client.on('close', function() {
+                    if (isMagnetLink(url)) {
+                        play(url);
+                    } else {
+                        var steam = request(url).pipe(fs.createWriteStream(props.filename));
+                        steam.on('finish', function () {
+                            let path = require('path').resolve('.');
+                            play(path + '/' + props.filename);
+                        })      
+                    }          
+                });
+            }
         } catch (error) {
             if(getDomain(url) == '') {
                 let uri = new URL(url);
@@ -232,6 +311,5 @@ function getHref(path) {
 
 function getDomain(url) {
     let uri = new URL(url);
-    console.log(uri);
     return uri.protocol == 'file:' ? '' : uri.protocol + '//' + uri.host;
 }

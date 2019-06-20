@@ -11,6 +11,7 @@ document.getElementById("form").addEventListener('submit', (e) => {
     document.getElementById("container2").innerHTML = "";
     document.getElementById("result").innerHTML = "";
     document.getElementById("searchText").value = "";
+    bis.setSearch(search);
     providers.list.forEach(provider => {
         bis.showUrl(provider.searchUrl + search, provider, 1);
     });
