@@ -241,7 +241,8 @@ function openLink(url, provider) {
         fs.unlinkSync(props.filename);
     } catch (e) { }
     if (isMagnetLink(url)) {
-        play(url);
+        document.getElementById('myModal').setAttribute('url', url);
+        $('#myModal').modal('show')
     } else {
         try {
             if(provider && provider.isJson){
@@ -269,12 +270,16 @@ function openLink(url, provider) {
                 });
                 client.on('close', function() {
                     if (isMagnetLink(url)) {
-                        play(url);
+                        // play(url);
+                        document.getElementById('myModal').setAttribute('url', url);
+                        $('#myModal').modal('show')                
                     } else {
                         var steam = request(url).pipe(fs.createWriteStream(props.filename));
                         steam.on('finish', function () {
                             let path = require('path').resolve('.');
-                            play(path + '/' + props.filename);
+                            // play(path + '/' + props.filename);
+                            document.getElementById('myModal').setAttribute('url', path + '/' + props.filename);
+                            $('#myModal').modal('show')                    
                         })      
                     }          
                 });
@@ -282,7 +287,9 @@ function openLink(url, provider) {
                 var steam = request(url).pipe(fs.createWriteStream(props.filename));
                 steam.on('finish', function () {
                     let path = require('path').resolve('.');
-                    play(path + '/' + props.filename);
+                    document.getElementById('myModal').setAttribute('url', path + '/' + props.filename);
+                    $('#myModal').modal('show')         
+                    // play(path + '/' + props.filename);
                 })      
             }
         } catch (error) {

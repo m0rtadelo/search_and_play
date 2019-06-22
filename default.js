@@ -7,8 +7,6 @@ document.getElementById("form").addEventListener('submit', (e) => {
     e.preventDefault();
     let search = document.getElementById('searchText').value;
     bis.log(`searching '${search}'...`);
-    // document.getElementById("container1").innerHTML = "";
-    // document.getElementById("container2").innerHTML = "";
     document.getElementById("result").innerHTML = "";
     document.getElementById("searchText").value = "";
     bis.setSearch(search);
@@ -17,6 +15,10 @@ document.getElementById("form").addEventListener('submit', (e) => {
     });
 });
 
+document.getElementById('playNow').addEventListener('click', (e) => {
+    e.preventDefault();
+    bis.openTorrent($('#myModal').attr('url'));
+})
 document.getElementById('openTorrent').addEventListener('click', (e) => {
     e.preventDefault();
     dialog.showOpenDialog(this, function (names) {
