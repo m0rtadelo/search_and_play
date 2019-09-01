@@ -1,27 +1,38 @@
-const view = require('./view');
-const providers = require('./providers');
-const rra = require('recursive-readdir-async');
+const view = require('./view')
+const search = require('./search')
+const providers = require('./providers.json')
+const rra = require('recursive-readdir-async')
 
-function main() {
-    view.renderTabs(providers.list);
-    activateTabs();
+function main () {
+  view.setSearchListener(searchString => {
+    search.byText(providers, searchString)
+  })
+  view.setTorrentListener(fullname => {
+    search.open(undefined, fullname)
+  })
+  view.setMagnetListener(magnet => {
+    search.open(undefined, magnet)
+  })
+  view.renderTabs(providers.data)
+  activateTabs()
 };
 
-function activateTabs() {
-    providers.list.forEach(provider => {
-        if (provider.type === 'folder') {
-            activateFolderTab(provider);
-        }
-    })
+function activateTabs () {
+  providers.data.forEach(provider => {
+    if (provider.type === 'folder') { activateFolderTab(provider) }
+  })
 }
 
-function activateFolderTab(provider) {
-    console.log('ACtivating tab: ' + provider.name);
-    rra.list(provider.path, item => {
-        console.log(item);
-    }).catch(err => {
-        console.error(err);
-    });
+function activateFolderTab (provider) {
+  view.init(provider)
+  rra.list(provider.path, { normalizePath: false }, (item) => {
+    if (!item.isDirectory) {
+      view.addItem(provider, item)
+    }
+  }).catch(err => {
+    view.setError(provider, err)
+  })
+  view.end(provider)
 }
-// Start main process
-main();
+
+main()

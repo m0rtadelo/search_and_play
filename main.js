@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const { app, BrowserWindow } = require('electron')
 // const {createServer} = require('http-server');
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -8,7 +8,7 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1220, height: 800, autoHideMenuBar: true})
+  mainWindow = new BrowserWindow({ width: 1220, height: 800, autoHideMenuBar: true })
   // server = new createServer();
   // and load the index.html of the app.
   mainWindow.loadFile('default.html')
