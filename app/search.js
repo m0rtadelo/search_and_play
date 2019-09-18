@@ -29,7 +29,9 @@ function requestUrl (provider, url, isDetail) {
         if (provider.type === 'web') {
           provider.lastUrl = url
           parseWeb(provider, body, isDetail)
-          view.showSuccess(`[${provider.name}] Search finished!`)
+          if (!isDetail) {
+            view.showSuccess(`[${provider.name}] Search finished!`)
+          }
         } else if (provider.type === 'jacket') {
           // TODO: Add Jacket
         } else {
@@ -49,9 +51,13 @@ function parseWeb (provider, body, isDetail) {
       requestUrl(provider, url, true)
     })
   } catch (error) {
-    torrent.get(provider.lastUrl, (fullname) => {
-      open(provider, fullname)
-    })
+    if (error.toString().includes('outerHTML')) {
+      view.setError(provider, error)
+    } else {
+      torrent.get(provider.lastUrl, (fullname) => {
+        open(provider, fullname)
+      })
+    }
   }
 }
 function open (provider, url) {

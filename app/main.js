@@ -29,6 +29,10 @@ function activateFolderTab (provider) {
     if (!item.isDirectory) {
       view.addItem(provider, item)
     }
+  }).then(result => {
+    if (result.error) {
+      view.setError(provider, result.error)
+    }
   }).catch(err => {
     view.setError(provider, err)
   })
