@@ -21,6 +21,7 @@ function activateTabs () {
   providers.data.forEach(provider => {
     if (provider.type === 'folder') { activateFolderTab(provider) }
   })
+  view.refreshHistory()
 }
 
 function activateFolderTab (provider) {
@@ -39,4 +40,7 @@ function activateFolderTab (provider) {
   view.end(provider)
 }
 
+function test () {
+  view.showInfo('test')
+}
 main()

@@ -2,6 +2,8 @@ const view = require('./view')
 const request = require('request')
 const player = require('./player')
 const torrent = require('./torrent')
+const log = require('./logger')
+
 let searchText = ''
 
 function byText (providers, text) {
@@ -61,6 +63,7 @@ function parseWeb (provider, body, isDetail) {
   }
 }
 function open (provider, url) {
+  view.refreshHistory(log.open({ provider: provider, url: url, searchText: searchText }))
   player.open(provider, url, (error) => {
     if (error) {
       view.showError(error)
@@ -71,5 +74,6 @@ function open (provider, url) {
 }
 module.exports = {
   byText: byText,
-  open: open
+  open: open,
+  requestUrl: requestUrl
 }

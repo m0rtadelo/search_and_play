@@ -4,7 +4,7 @@ const request = require('request')
  * @param {string} link url or magnet link
  */
 function isMagnetLink (link) {
-  return link.indexOf('magnet:') === 0
+  return link && link.indexOf('magnet:') === 0
 }
 function get (url, fn) {
   var steam = request(url).pipe(require('fs').createWriteStream('data.torrent'))

@@ -1,7 +1,10 @@
 const runner = require('./player')
+const torrent = require('./torrent')
 const toastr = require('toastr')
+const log = require('./logger')
 const myTab = document.getElementById('myTab')
 const myTabContent = document.getElementById('myTabContent')
+
 const { dialog } = require('electron').remote
 
 let defaultSet
@@ -17,9 +20,11 @@ function addTab (provider) {
   }
 }
 
-function addDownloadTab () {
+function addExtraTabs () {
   myTab.innerHTML += `<li class="nav-item"><a class="nav-link" id="result-tab" data-toggle="tab" href="#download" role="tab" aria-controls="result" aria-selected="false">Download</a></li>`
   myTabContent.innerHTML += `<div class="tab-pane fade" id="download" role="tabpanel" aria-labelledby="result-tab"><div class="container" id="resultcontainer"></div></div>`
+  myTab.innerHTML += `<li class="nav-item"><a class="nav-link" id="logger-tab" data-toggle="tab" href="#logger" role="tab" aria-controls="logger" aria-selected="false">History</a></li>`
+  myTabContent.innerHTML += `<div class="tab-pane fade" id="logger" role="tabpanel" aria-labelledby="logger-tab"><div class="container" id="loggercontainer"></div></div>`
 }
 function renderTabs (providers) {
   myTab.innerHTML = ''
@@ -28,7 +33,7 @@ function renderTabs (providers) {
   providers.forEach(provider => {
     addTab(provider)
   })
-  addDownloadTab()
+  addExtraTabs()
   // add 'onClick' tab event listener
   $('#myTab a').on('click', function (e) {
     e.preventDefault()
@@ -46,13 +51,7 @@ function addItem (provider, item) {
   node.innerHTML = '<i class="fas fa-file-video"></i>&nbsp;' + ' ' + item.name
   node.addEventListener('click', (elem) => {
     toastr.info('Playing: ' + item.name)
-    runner.open(provider, elem.target.name, (error) => {
-      if (error) {
-        toastr.error(error)
-      } else {
-        toastr.info('Finished: ' + item.name)
-      }
-    })
+    play(provider, elem.target.name)
   })
   getContainer(provider).appendChild(node)
 }
@@ -132,6 +131,49 @@ function addContent (provider, data, isDetail, fn) {
     })
   })
 }
+
+function refreshHistory (data) {
+  const ctx = getContainer({ name: 'logger' })
+  let body = ''
+  ctx.innerHTML = ''
+  let ids = []
+  const items = log.get(data)
+  items.forEach(item => {
+    if (torrent.isMagnetLink(item.url)) {
+      item.id = 'm' + new Date(item.time).getTime()
+      ids.push(item)
+    }
+    body = `
+      <div class="row" style="padding: 5px">
+        <div class="col" onClick="javascript: document.getElementById('searchText').value='${item.searchText}'" style="cursor:pointer"><h5>${item.searchText}</h5></div>
+        <div class="col-6"><small class="text-muted" name="" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.provider.lastUrl}</small></div>
+        <div class="col-2" style="text-align:right;">`
+    if (item.id) {
+      body += `<button id="${item.id}" class="btn btn-info btn-sm"><i class="fas fa-play"></i></button>`
+    }
+    body += `&nbsp;&nbsp;<button onClick="javascript: document.getElementById('searchText').value='${item.searchText}'" id="${item.provider.lastUrl}" class="btn btn-info btn-sm"><i class="fas fa-search"></i></button>          
+        </div>
+      </div>
+    `
+    ctx.innerHTML += body
+  })
+  ids.forEach(item => {
+    document.getElementById(item.id).addEventListener('click', function (elem) {
+      play(item.provider, item.url)
+    })
+  })
+}
+
+function play (provider, url) {
+  runner.open(provider, url, (error) => {
+    if (error) {
+      toastr.error(error)
+    } else {
+      toastr.info('Player finished!')
+    }
+  })
+
+}
 module.exports = {
   renderTabs: renderTabs,
   setLoading: setLoading,
@@ -146,5 +188,6 @@ module.exports = {
   showInfo: showInfo,
   showError: showError,
   showSuccess: showSuccess,
-  addContent: addContent
+  addContent: addContent,
+  refreshHistory: refreshHistory
 }

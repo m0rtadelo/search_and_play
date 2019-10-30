@@ -28,9 +28,11 @@
   "dependencies": {
     "electron-prompt": "^1.2.0",
     "json-log": "^3.0.1",
+    "load-json-file": "^6.2.0",
     "recursive-readdir-async": "^1.1.5",
     "request": "^2.88.0",
     "socket.io": "^2.2.0",
-    "toastr": "^2.1.4"
+    "toastr": "^2.1.4",
+    "write-json-file": "^4.2.0"
   }
 }
