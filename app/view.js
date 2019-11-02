@@ -43,7 +43,7 @@ function renderTabs (providers) {
 function setLoading (provider) {
   getContainer(provider).innerHTML = `Loading...<div class="spinner-grow" role="status"><span class="sr-only">Loading...</span></div>`
 }
-function addItem (provider, item) {
+function addFolderItem (provider, item) {
   const node = document.createElement('a')
   node.setAttribute('name', item.fullname)
   node.setAttribute('href', '#')
@@ -54,6 +54,24 @@ function addItem (provider, item) {
     play(provider, elem.target.name)
   })
   getContainer(provider).appendChild(node)
+}
+function addJacketItem (provider, item) {
+  const link = item.MagnetUri ? item.MagnetUri : item.Link
+  getContainer(provider).innerHTML +=
+  `<div class="list-group" style="font-size:10pt" name="${link}"><a name="${link}" id="${link}" class="list-group-item list-group-item-action"><span class="badge badge-success" name="${link}">${item.Seeders} / ${item.Peers}</span>&nbsp;${item.Title}&nbsp;&nbsp;<small class="text-muted" name="${link}">[${(item.Size/1024/1024/1024).toFixed(2)} Gb]</small></a></div>`
+  getContainer(provider).querySelectorAll('a').forEach((elem) => {
+    elem.addEventListener('click', function (p) {
+      // toastr.info('Playing: ' + p.target.name
+      play(provider, p.target.name)
+    })
+  })
+}
+function addItem (provider, item) {
+  if (provider.type === 'jackett') {
+    addJacketItem(provider, item)
+  } else {
+    addFolderItem(provider, item)
+  }
 }
 function getContainer (provider) {
   return document.getElementById(provider.name + 'container')

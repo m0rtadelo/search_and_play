@@ -12,7 +12,7 @@
     },
     {
       "name": "GranTorrent",
-      "searchUrl": "https://grantorrent1.com/?s=",
+      "searchUrl": "https://grantorrent.tv/?s=",
       "type": "web",
       "searchSelector": "div.contenedor-home",
       "downSelector": "table.demo"
@@ -25,9 +25,9 @@
       "downSelector": "div.enlace_descarga"
     },
     {
-      "name": "Jacket",
+      "name": "Jackett",
       "searchUrl": "http://nas:9117/api/v2.0/indexers/all/results?apikey=euk502lw6vb8bvujdrrdtwh1ahqrkyva&Query=",
-      "type": "jacket",
+      "type": "jackett",
       "filter": true
     }
   ]

@@ -28,14 +28,26 @@ function requestUrl (provider, url, isDetail) {
       if (error) {
         view.setError(provider, error)
       } else {
+        provider.lastUrl = url
         if (provider.type === 'web') {
-          provider.lastUrl = url
           parseWeb(provider, body, isDetail)
           if (!isDetail) {
             view.showSuccess(`[${provider.name}] Search finished!`)
           }
-        } else if (provider.type === 'jacket') {
-          // TODO: Add Jacket
+        } else if (provider.type === 'jackett') {
+          let results = JSON.parse(body).Results
+          results.sort(function (a, b) {
+            return b.Seeders - a.Seeders
+          })
+          view.getContainer(provider).innerHTML = ''
+          results.forEach(item => {
+            if (item.Seeders > 0 || item.Peers > 0) {
+              if (provider.filter && item.Title.toString().toUpperCase().includes(searchText.toString().toUpperCase())) {
+                view.addItem(provider, item)
+              }
+            }
+          })
+          view.showSuccess(`[${provider.name}] Search finished!`)
         } else {
           view.setError(provider, `incorrect provider type for Search!`)
         }
